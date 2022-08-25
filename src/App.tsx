@@ -1,26 +1,31 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import { FunctionComponent, useState } from 'react';
+import './styles/App.css';
+import Import from './pages/Import';
+import Edit from './pages/Edit';
 
-function App() {
+const enum MODE {
+  IMPORT,
+  EDIT,
+  EXPORT,
+}
+
+const App: FunctionComponent = () => {
+  const [mode, setMode] = useState<MODE>(MODE.IMPORT);
+  const [originData, setOriginData] = useState<any[]>([]);
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+    <>
+      {mode === MODE.IMPORT &&
+        <Import onSubmit={data => {
+          setOriginData(data);
+          setMode(MODE.EDIT)
+        }}/>
+      }
+      {mode === MODE.EDIT &&
+        <Edit data={originData} />
+      }
+    </>
+  )
 }
 
 export default App;
