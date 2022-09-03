@@ -26,8 +26,37 @@ export const DataFieldOption = {
     project: ['日常', '约会'],
 }
 
+export const exportFields = [
+    { label: '交易类型', key: 'inOrOut' },
+    { label: '分类', key: 'firstCategory' },
+    { label: '子分类', key: 'secondCategory' },
+    { label: '账户1', key: 'wallet' },
+    { label: '金额', key: 'amount' },
+    { label: '日期', key: 'time' },
+    { label: '成员', key: 'member' },
+    { label: '项目', key: 'project' },
+    { label: '备注', key: 'note' },
+    // { label: '', key: 'type' },
+    // { label: '', key: 'receiver' },
+    // { label: '', key: 'goods' },
+    // { label: '', key: 'payWay' },
+    // { label: '', key: 'status' },
+    // { label: '', key: 'businessNo' },
+    // { label: '', key: 'shopNo' },
+    // { label: '', key: 'receiverAccount' },
+]
+
 export enum FORM_ITEM_TYPE {
     INPUT,
     CASCADER,
     SELECT,
+    DATETIME,
+    INPUT_AMOUNT,
+    TEXTAREA,
 }
+
+export const enum MODE {
+    IMPORT,
+    EDIT,
+    EXPORT,
+  }

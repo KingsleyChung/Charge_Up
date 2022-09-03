@@ -3,13 +3,20 @@
 #root {
   height: 100vh;
   width: 100vw;
+  overflow: scroll;
   background-color: dodgerblue;
 }
-/* 
-#import {
-  height: 100%;
+#edit {
+  overflow-x: hidden;
+}
+#nav_bar {
+  position: fixed;
+  bottom: 0;
   width: 100%;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-} */
+  box-sizing: border-box;
+  padding: 1.6rem;
+}
+.my_tab .ant-tabs-content-holder {
+  overflow: auto;
+  height: 100%;
+}

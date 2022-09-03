@@ -2,7 +2,7 @@ import { Moment } from 'moment';
 
 declare type FlowItem = {
     appType: 'wechat' | 'alipay';
-    time: Moment;
+    time: Moment | string;
     type: string;
     receiver: string;
     goods: string;

@@ -25,6 +25,58 @@ const xlsxToJson = (file: any) => {
   })
 }
 
+// require needKeys.length = xlsxKeys.length
+// data为[{},{}],needKeys是需要哪些英文字段，xlsxKeys是列头名称（中文）,filename为文件名
+const jsonToXlsx = (data: any, needKeys: string[], xlsxKeys: string[], filename: string) => {
+  if (!data.length) {
+    return false
+  }
+  if (needKeys.length !== xlsxKeys.length) {
+    xlsxKeys = needKeys
+  }
+  data = data.map((v: any) => {
+    let res: any = {}
+    for (let i = 0; i < needKeys.length; i++) {
+      res[xlsxKeys[i]] = v[needKeys[i]]
+    }
+    return res
+  })
+  var XLSX = require('xlsx')
+  const wopts = { bookType: 'xlsx', bookSST: false, type: 'binary' }
+  const wb: any = { SheetNames: ['Sheet1'], Sheets: {}, Props: {} }
+  wb.Sheets['Sheet1'] = XLSX.utils.json_to_sheet(data)
+  saveAs(new Blob([s2ab(XLSX.write(wb, wopts)) as BlobPart], { type: 'application/octet-stream' }), filename + '.' + (wopts.bookType === 'biff2' ? 'xls' : wopts.bookType))
+  return true
+}
+
+// 以下三个函数保存json问excel文件
+const saveAs = (obj: any, fileName: string) => {
+  let tmpa = document.createElement('a')
+  tmpa.download = fileName || '下载'
+  tmpa.href = URL.createObjectURL(obj)
+  tmpa.click()
+  setTimeout(function () {
+    URL.revokeObjectURL(obj)
+  }, 100)
+}
+
+const s2ab = (s: any) => {
+  if (typeof ArrayBuffer !== 'undefined') {
+    let buf = new ArrayBuffer(s.length)
+    let view = new Uint8Array(buf)
+    for (let i = 0; i !== s.length; ++i) {
+      view[i] = s.charCodeAt(i) & 0xFF
+    }
+    return buf
+  } else {
+    let buf = new Array(s.length)
+    for (let i = 0; i !== s.length; ++i) {
+      buf[i] = s.charCodeAt(i) & 0xFF
+    }
+    return buf
+  }
+}
+
 const formatData = (originData: any) => {
   const result = []
 
@@ -88,7 +140,7 @@ const getUnifiedData = (data1: any[], data2: any[]) => {
       let value = data[key]
       if (finalKey) {
         if (finalKey === 'time') {
-          value = moment(value).format('YYYY-MM-DD HH:mm')
+          value = moment(value);
         }
         if (finalKey === 'amount') {
           if (value?.startsWith('¥')) {
@@ -116,9 +168,11 @@ const getUnifiedData = (data1: any[], data2: any[]) => {
   })
   return unifiedData
 }
-
-export default {
+const utils = {
   xlsxToJson,
+  jsonToXlsx,
   formatData,
   getUnifiedData,
 }
+
+export default utils;

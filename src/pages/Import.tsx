@@ -1,6 +1,6 @@
 import { FunctionComponent, useRef } from 'react';
 import { AlipayCircleOutlined, WechatOutlined } from '@ant-design/icons';
-import { Row, Button, Upload, message } from 'antd';
+import { Row, Button, Upload, Card, message } from 'antd';
 import utils from '../utils';
 
 interface UploadBtnProps {
@@ -27,7 +27,9 @@ const UploadButton: FunctionComponent<UploadBtnProps> = (props: UploadBtnProps):
     };
     return (
         <Upload {...uploadProps}>
-            <Button icon={props.icon}></Button>
+            <Card hoverable>
+                {props.icon}
+            </Card>
         </Upload>
     );
 };
