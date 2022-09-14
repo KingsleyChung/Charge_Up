@@ -6,6 +6,7 @@ import EditedList from '../components/EditedList';
 import NavBar from '../components/NavBar';
 import utils from '../utils';
 import moment, { Moment } from 'moment';
+import ConfigLoader from '../components/ConfigLoader';
 
 interface Props {
     data: string;
@@ -18,6 +19,8 @@ interface State {
     deletedData: FlowItem[];
     editedData: FlowItem[];
     showList: boolean;
+    showConfigLoader: boolean;
+    config: Record<string, any>;
 }
 
 export default class Edit extends React.Component<Props, State> {
@@ -26,12 +29,15 @@ export default class Edit extends React.Component<Props, State> {
     constructor(props: Props) {
         super(props);
         const data = props.data ? JSON.parse(props.data) : {};
+        const config = JSON.parse(localStorage.getItem('config') || '{}');
         this.state = {
             currentIndex: 0,
             originData: this.convertDate(data.originData, 'moment'),
             deletedData: this.convertDate(data.deletedData, 'moment'),
             editedData: this.convertDate(data.editedData, 'moment'),
             showList: false,
+            showConfigLoader: false,
+            config,
         }
     }
 
@@ -40,14 +46,12 @@ export default class Edit extends React.Component<Props, State> {
     }
 
     componentWillUnmount() {
-        console.log('unmount')
         this.clearCacheTimer();
     }
 
     componentDidUpdate(prevProps: Props) {
         if (prevProps.data !== this.props.data) {
             const newData = JSON.parse(this.props.data);
-            console.log('update')
             this.setState({
                 originData: this.convertDate(newData.originData, 'moment'),
                 editedData: this.convertDate(newData.editedData, 'moment'),
@@ -111,7 +115,6 @@ export default class Edit extends React.Component<Props, State> {
     deleteData = () => {
         const { currentIndex, originData, deletedData } = this.state;
         const data = originData[currentIndex];
-        console.log('--- Delete', data);
         deletedData.push(data);
         originData.splice(currentIndex, 1);
         this.setState({ originData, deletedData });
@@ -119,7 +122,6 @@ export default class Edit extends React.Component<Props, State> {
 
     saveData = (data: FlowItem) => {
         const { currentIndex, originData, editedData } = this.state;
-        console.log('save', data);
         editedData.push(data);
         originData.splice(currentIndex, 1);
         this.setState({ originData, editedData });
@@ -165,31 +167,45 @@ export default class Edit extends React.Component<Props, State> {
         this.setState({ showList: !showList })
     }
 
+    saveConfig = (config: Record<string, any> | null) => {
+        if (!config) {
+            return;
+        }
+        localStorage.setItem('config', JSON.stringify(config));
+        this.setState({ config });
+        this.toggleConfigLoader();
+    }
+
+    toggleConfigLoader = () => {
+        const { showConfigLoader } = this.state;
+        this.setState({ showConfigLoader: !showConfigLoader });
+    }
+
     goBack = () => {
         localStorage.removeItem('cacheData')
         this.props.setMode(MODE.IMPORT);
     }
 
     render(): JSX.Element {
-        const { originData, editedData, deletedData, currentIndex, showList } = this.state;
+        const { originData, editedData, deletedData, currentIndex, showList, showConfigLoader, config } = this.state;
         if (!originData) {
             return <></>
         }
-        console.log(originData?.[currentIndex], originData)
         return (
             <div id="edit">
-                <DetailCard data={originData?.[currentIndex]} saveData={this.saveData} deleteData={this.deleteData} />
-                <EditedList editedData={editedData} deletedData={deletedData} show={showList} moveToOriginData={this.moveToOriginData} onClose={() => this.toggleList()} />
+                <DetailCard data={originData?.[currentIndex]} config={config} saveData={this.saveData} deleteData={this.deleteData} />
                 <NavBar
                     currentIndex={currentIndex}
                     totalCount={originData.length}
                     goPrev={this.goPrev}
                     goNext={this.goNext}
-                    deleteData={this.deleteData}
+                    loadConfig={this.toggleConfigLoader}
                     exportData={this.exportData}
                     toggleList={this.toggleList}
                     goBack={this.goBack}
                 />
+                <EditedList editedData={editedData} deletedData={deletedData} show={showList} moveToOriginData={this.moveToOriginData} onClose={() => this.toggleList()} />
+                <ConfigLoader show={showConfigLoader} onConfirm={this.saveConfig} onClose={this.toggleConfigLoader} />
             </div>
         )
     }

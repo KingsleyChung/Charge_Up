@@ -143,7 +143,7 @@ const getUnifiedData = (data1: any[], data2: any[]) => {
           value = moment(value);
         }
         if (finalKey === 'amount') {
-          if (value?.startsWith('¥')) {
+          if (typeof value === 'string' && value?.startsWith('¥')) {
             value = value.slice(1, value.length);
           }
           value = +value;
@@ -168,11 +168,23 @@ const getUnifiedData = (data1: any[], data2: any[]) => {
   })
   return unifiedData
 }
+
+const getJsonFromFile = (file: any) => {
+  return new Promise(resolve => {
+    const fileReader = new FileReader();
+    fileReader.readAsText(file, "UTF-8");
+    fileReader.onload = e => {
+      resolve(JSON.parse(e?.target?.result as string));
+    };
+  });
+}
+
 const utils = {
   xlsxToJson,
   jsonToXlsx,
   formatData,
   getUnifiedData,
+  getJsonFromFile,
 }
 
 export default utils;

@@ -1,13 +1,15 @@
 import React, { useEffect } from 'react';
 import { FlowItem } from '../typings';
-import { Card, Form, Input, Select, Cascader, DatePicker, Button, Row, Col, Divider, Typography } from 'antd';
+import { Card, Form, Input, Select, Cascader, DatePicker, Button, Row, Col, Divider, Typography, Tooltip } from 'antd';
 import { FORM_ITEM_TYPE, DataFieldOption } from '../constant';
 import TextArea from 'antd/lib/input/TextArea';
 
 const { Option } = Select;
+const { Paragraph } = Typography;
 
 interface Props {
     data: FlowItem & { category?: string[] | undefined };
+    config: Record<string, any> | null;
     saveData: (data: FlowItem) => void;
     deleteData: () => void;
 }
@@ -17,28 +19,10 @@ const itemLayout = {
     wrapperCol: { span: 14 },
 };
 
-const categoryOptions = (() => {
-    const options: any[] = [];
-    DataFieldOption.firstCategory.forEach(firstCategory => {
-        const option: Record<string, any> = {
-            label: firstCategory,
-            value: firstCategory,
-        }
-        if (DataFieldOption.secondCategory[firstCategory as keyof typeof DataFieldOption.secondCategory]) {
-            option.children = DataFieldOption.secondCategory[firstCategory as keyof typeof DataFieldOption.secondCategory].map(secondCategory => {
-                return {
-                    label: secondCategory,
-                    value: secondCategory,
-                };
-            });
-        }
-        options.push(option);
-    });
-    return options;
-})();
-
 const DetailCard: React.FC<Props> = (props: Props): JSX.Element => {
+    const fieldOption = props.config?.DataFieldOption || DataFieldOption;
     const [form] = Form.useForm<FlowItem>();
+
     useEffect(() => {
         const data = props.data;
         if (typeof data.firstCategory === 'string') {
@@ -60,6 +44,26 @@ const DetailCard: React.FC<Props> = (props: Props): JSX.Element => {
         }
         form.setFieldsValue(props.data);
     }, [props])
+
+    const categoryOptions = (() => {
+        const options: any[] = [];
+        fieldOption.firstCategory.forEach((firstCategory: string) => {
+            const option: Record<string, any> = {
+                label: firstCategory,
+                value: firstCategory,
+            }
+            if (fieldOption.secondCategory[firstCategory as keyof typeof fieldOption.secondCategory]) {
+                option.children = fieldOption.secondCategory[firstCategory as keyof typeof fieldOption.secondCategory].map((secondCategory: string) => {
+                    return {
+                        label: secondCategory,
+                        value: secondCategory,
+                    };
+                });
+            }
+            options.push(option);
+        });
+        return options;
+    })();
 
     const renderFormItem = (param: { name: string; label: string; type: FORM_ITEM_TYPE; rules?: any[]; options?: any[] }): JSX.Element => {
         const { name, label, type, rules, options } = param;
@@ -104,37 +108,42 @@ const DetailCard: React.FC<Props> = (props: Props): JSX.Element => {
     };
 
     return (
-        <Card style={{ margin: '1.6rem' }}>
+        <Card id="detail_card" style={{ margin: '1.6rem' }}>
             <Form {...itemLayout} size='small' form={form} name="control-hooks" initialValues={props.data} onFinish={onFinish}>
                 <Row gutter={12}>
                     <Col span={12}>
                         {renderFormItem({ name: 'amount', label: '金额', type: FORM_ITEM_TYPE.INPUT_AMOUNT, rules: [{ required: true }] })}
                     </Col>
                     <Col span={12}>
+                        {renderFormItem({ name: 'inOrOut', label: '收/支', type: FORM_ITEM_TYPE.SELECT, rules: [{ required: true }], options: fieldOption.inOrOut })}
+                    </Col>
+                </Row>
+                <Row gutter={12}>
+                    <Col span={12}>
                         {renderFormItem({ name: 'category', label: '分类', type: FORM_ITEM_TYPE.CASCADER, rules: [{ required: true }] })}
                     </Col>
-                </Row>
-                <Row gutter={12}>
                     <Col span={12}>
-                        {renderFormItem({ name: 'inOrOut', label: '收/支', type: FORM_ITEM_TYPE.SELECT, rules: [{ required: true }], options: DataFieldOption.inOrOut })}
-                    </Col>
-                    <Col span={12}>
-                        {renderFormItem({ name: 'wallet', label: '钱包', type: FORM_ITEM_TYPE.SELECT, rules: [{ required: true }], options: DataFieldOption.wallet })}
+                        {renderFormItem({ name: 'wallet', label: '钱包', type: FORM_ITEM_TYPE.SELECT, rules: [{ required: true }], options: fieldOption.wallet })}
                     </Col>
                 </Row>
                 <Row gutter={12}>
                     <Col span={12}>
-                        {renderFormItem({ name: 'member', label: '成员', type: FORM_ITEM_TYPE.SELECT, options: DataFieldOption.member })}
+                        {renderFormItem({ name: 'member', label: '成员', type: FORM_ITEM_TYPE.SELECT, options: fieldOption.member })}
                     </Col>
                     <Col span={12}>
-                        {renderFormItem({ name: 'project', label: '项目', type: FORM_ITEM_TYPE.SELECT, options: DataFieldOption.project })}
+                        {renderFormItem({ name: 'project', label: '项目', type: FORM_ITEM_TYPE.SELECT, options: fieldOption.project })}
                     </Col>
                 </Row>
                 {renderFormItem({ name: 'time', label: '时间', type: FORM_ITEM_TYPE.DATETIME, rules: [{ required: true }]})}
                 {renderFormItem({ name: 'note', label: '备注', type: FORM_ITEM_TYPE.TEXTAREA })}
                 <Divider />
                 <Typography>
-                    额外信息
+                    <Tooltip title={props.data.receiver}>
+                        <Paragraph ellipsis={true}>收款人：{props.data.receiver}</Paragraph>
+                    </Tooltip>
+                    <Tooltip title={props.data.goods}>
+                        <Paragraph ellipsis={true}>商品：{props.data.goods}</Paragraph>
+                    </Tooltip>
                 </Typography>
                 <Row justify='center' gutter={24} style={{ marginTop: '1.6rem' }}>
                     <Col>

@@ -1,20 +1,20 @@
 import React from 'react';
 import { Button, Row, Col } from 'antd';
-import { LeftOutlined, RightOutlined, DeleteOutlined, UnorderedListOutlined } from '@ant-design/icons';
+import { LeftOutlined, RightOutlined, SettingOutlined, UnorderedListOutlined } from '@ant-design/icons';
 
 interface Props {
     currentIndex: number;
     totalCount: number;
     goPrev: () => void;
     goNext: () => void;
-    deleteData: () => void;
+    loadConfig: () => void;
     exportData: () => void;
     toggleList: () => void;
     goBack: () => void;
 }
 
 const NavBar: React.FC<Props> = (props: Props): JSX.Element => {
-    const { currentIndex, totalCount, goPrev, goNext, deleteData, toggleList, exportData, goBack } = props;
+    const { currentIndex, totalCount, goPrev, goNext, loadConfig, toggleList, exportData, goBack } = props;
     return (
         <div id='nav_bar'>
             <Row justify='space-between' align='middle'>
@@ -22,7 +22,7 @@ const NavBar: React.FC<Props> = (props: Props): JSX.Element => {
                 <Button shape="circle" icon={<LeftOutlined />} size="large" onClick={goPrev} />
                 {!!(currentIndex >= 0 && totalCount >= currentIndex + 1) && <span style={{ fontSize: 20 }}>{`${currentIndex + 1} / ${totalCount}`}</span>}
                 <Button shape="circle" icon={<RightOutlined />} size="large" onClick={goNext} />
-                <Button type="primary" shape="circle" icon={<DeleteOutlined />} size="large" danger onClick={deleteData} />
+                <Button shape="circle" icon={<SettingOutlined />} size="large" onClick={loadConfig} />
             </Row>
             <Row justify='center' align='middle' gutter={30} style={{ marginTop: 24 }}>
                 <Col>

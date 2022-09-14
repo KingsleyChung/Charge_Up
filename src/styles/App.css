@@ -8,13 +8,18 @@
 }
 #edit {
   overflow-x: hidden;
+  height: 100%;
 }
 #nav_bar {
   position: fixed;
   bottom: 0;
   width: 100%;
+  height: 8.8rem;
   box-sizing: border-box;
   padding: 1.6rem;
+}
+#detail_card {
+  max-height: calc(100% - 8.8rem - 1.6rem);
 }
 .my_tab .ant-tabs-content-holder {
   overflow: auto;

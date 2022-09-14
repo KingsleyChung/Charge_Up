@@ -9,15 +9,14 @@ const App: FunctionComponent = () => {
   const [originData, setOriginData] = useState<string>('');
 
   useEffect(() => {
-    console.log('effect')
     const cacheData = localStorage.getItem('cacheData') || '';
+    const config = localStorage.getItem('config') || '';
     if (cacheData) {
       setOriginData(cacheData);
       setMode(MODE.EDIT);
     }
   });
 
-  console.log(mode)
   return (
     <>
       {mode === MODE.IMPORT &&

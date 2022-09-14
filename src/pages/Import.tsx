@@ -17,7 +17,8 @@ const UploadButton: FunctionComponent<UploadBtnProps> = (props: UploadBtnProps):
             try {
                 const rawData = await utils.xlsxToJson(file);
                 const formatedData = utils.formatData(rawData);
-                console.log(file, formatedData);
+                console.log('rawData:', rawData);
+                console.log('formatedData:', formatedData);
                 props.handleData(formatedData)
                 return false;
             } catch (err) {
@@ -76,7 +77,7 @@ const Import: FunctionComponent<Props> = (props: Props): JSX.Element => {
                         return;
                     }
                     const unifiedData = utils.getUnifiedData(wxData?.current, aliData?.current)
-                    console.log('unifiedData', unifiedData)
+                    console.log('unifiedData:', unifiedData)
                     props.onSubmit(unifiedData);
                 }}>
                     导入
