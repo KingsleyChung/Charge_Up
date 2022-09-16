@@ -6,7 +6,7 @@ import EditedList from '../components/EditedList';
 import NavBar from '../components/NavBar';
 import utils from '../utils';
 import moment, { Moment } from 'moment';
-import ConfigLoader from '../components/ConfigLoader';
+import Settings from '../components/Settings';
 
 interface Props {
     data: string;
@@ -19,7 +19,7 @@ interface State {
     deletedData: FlowItem[];
     editedData: FlowItem[];
     showList: boolean;
-    showConfigLoader: boolean;
+    showSettings: boolean;
     config: Record<string, any>;
 }
 
@@ -36,9 +36,9 @@ export default class Edit extends React.Component<Props, State> {
             deletedData: this.convertDate(data.deletedData, 'moment'),
             editedData: this.convertDate(data.editedData, 'moment'),
             showList: false,
-            showConfigLoader: false,
+            showSettings: false,
             config,
-        }
+        };
     }
 
     componentDidMount() {
@@ -60,25 +60,31 @@ export default class Edit extends React.Component<Props, State> {
         }
     }
 
-    convertDate = (data: FlowItem[], type: 'moment' | 'string', debug?: boolean) => {
+    convertDate = (
+        data: FlowItem[],
+        type: 'moment' | 'string',
+        debug?: boolean
+    ) => {
         if (!data) {
             return [];
         }
         if (type === 'moment') {
-            return data.map(item => {
+            return data.map((item) => {
                 const newItem = { ...item };
                 newItem.time = moment(newItem.time);
                 return newItem;
-            })
+            });
         } else if (type === 'string') {
-            return data.map(item => {
+            return data.map((item) => {
                 const newItem = { ...item };
-                newItem.time = moment(newItem.time).format('YYYY-MM-DD hh:mm:ss');
+                newItem.time = moment(newItem.time).format(
+                    'YYYY-MM-DD hh:mm:ss'
+                );
                 return newItem;
-            })
+            });
         }
         return [];
-    }
+    };
 
     initCacheTimer = () => {
         this.cacheTimer && clearInterval(this.cacheTimer);
@@ -91,26 +97,26 @@ export default class Edit extends React.Component<Props, State> {
             };
             localStorage.setItem('cacheData', JSON.stringify(cacheData));
         }, 20000);
-    }
+    };
 
     clearCacheTimer = () => {
         this.cacheTimer && clearInterval(this.cacheTimer);
         this.cacheTimer = null;
-    }
+    };
 
     goNext = () => {
         const { originData, currentIndex } = this.state;
         if (currentIndex + 1 < originData.length) {
             this.setState({ currentIndex: currentIndex + 1 });
         }
-    }
+    };
 
     goPrev = () => {
         const { currentIndex } = this.state;
         if (currentIndex - 1 >= 0) {
             this.setState({ currentIndex: currentIndex - 1 });
         }
-    }
+    };
 
     deleteData = () => {
         const { currentIndex, originData, deletedData } = this.state;
@@ -118,17 +124,18 @@ export default class Edit extends React.Component<Props, State> {
         deletedData.push(data);
         originData.splice(currentIndex, 1);
         this.setState({ originData, deletedData });
-    }
+    };
 
     saveData = (data: FlowItem) => {
         const { currentIndex, originData, editedData } = this.state;
         editedData.push(data);
         originData.splice(currentIndex, 1);
         this.setState({ originData, editedData });
-    }
+    };
 
     moveToOriginData = (type: 'edited' | 'deleted', index: number) => {
-        const { currentIndex, originData, editedData, deletedData } = this.state;
+        const { currentIndex, originData, editedData, deletedData } =
+            this.state;
         let sourceData;
         if (type === 'edited') {
             sourceData = editedData;
@@ -145,68 +152,116 @@ export default class Edit extends React.Component<Props, State> {
         } else if (type === 'deleted') {
             this.setState({ originData, deletedData: sourceData });
         }
-    }
+    };
 
     exportData = () => {
         const { editedData } = this.state;
         const keys: string[] = [];
         const labels: string[] = [];
-        exportFields.forEach(field => {
+        exportFields.forEach((field) => {
             keys.push(field.key);
             labels.push(field.label);
-        })
-        const finalData = editedData.map(data => {
+        });
+        const finalData = editedData.map((data) => {
             data.time = (data.time as Moment).format('YYYY-MM-DD hh:mm:ss');
             return data;
-        })
+        });
         utils.jsonToXlsx(finalData, keys, labels, 'myMoney');
-    }
+    };
 
     toggleList = () => {
         const { showList } = this.state;
-        this.setState({ showList: !showList })
-    }
+        this.setState({ showList: !showList });
+    };
 
-    saveConfig = (config: Record<string, any> | null) => {
+    toggleSettings = () => {
+        const { showSettings } = this.state;
+        this.setState({ showSettings: !showSettings });
+    };
+
+    importConfig = (config: Record<string, any> | null) => {
         if (!config) {
             return;
         }
         localStorage.setItem('config', JSON.stringify(config));
         this.setState({ config });
-        this.toggleConfigLoader();
-    }
+    };
 
-    toggleConfigLoader = () => {
-        const { showConfigLoader } = this.state;
-        this.setState({ showConfigLoader: !showConfigLoader });
-    }
+    importCacheData = (data: Record<string, any> | null) => {
+        console.log(data);
+        if (!data) {
+            return;
+        }
+        localStorage.setItem('cacheData', JSON.stringify(data));
+        this.setState({
+            originData: this.convertDate(data.originData, 'moment'),
+            deletedData: this.convertDate(data.deletedData, 'moment'),
+            editedData: this.convertDate(data.editedData, 'moment'),
+        });
+    };
+
+    exportConfig = () => {
+        const config = JSON.parse(localStorage.getItem('config') || '{}');
+        utils.objectToJsonFile(config, 'config');
+    };
+
+    exportCacheData = () => {
+        const data = JSON.parse(localStorage.getItem('cacheData') || '{}');
+        utils.objectToJsonFile(data, 'cacheData');
+    };
 
     goBack = () => {
-        localStorage.removeItem('cacheData')
+        localStorage.removeItem('cacheData');
         this.props.setMode(MODE.IMPORT);
-    }
+    };
 
     render(): JSX.Element {
-        const { originData, editedData, deletedData, currentIndex, showList, showConfigLoader, config } = this.state;
+        const {
+            originData,
+            editedData,
+            deletedData,
+            currentIndex,
+            showList,
+            showSettings,
+            config,
+        } = this.state;
         if (!originData) {
-            return <></>
+            return <></>;
         }
         return (
             <div id="edit">
-                <DetailCard data={originData?.[currentIndex]} config={config} saveData={this.saveData} deleteData={this.deleteData} />
+                <DetailCard
+                    data={originData?.[currentIndex]}
+                    config={config}
+                    saveData={this.saveData}
+                    deleteData={this.deleteData}
+                />
                 <NavBar
                     currentIndex={currentIndex}
                     totalCount={originData.length}
                     goPrev={this.goPrev}
                     goNext={this.goNext}
-                    loadConfig={this.toggleConfigLoader}
+                    openSettings={this.toggleSettings}
                     exportData={this.exportData}
                     toggleList={this.toggleList}
                     goBack={this.goBack}
                 />
-                <EditedList editedData={editedData} deletedData={deletedData} show={showList} moveToOriginData={this.moveToOriginData} onClose={() => this.toggleList()} />
-                <ConfigLoader show={showConfigLoader} onConfirm={this.saveConfig} onClose={this.toggleConfigLoader} />
+                <EditedList
+                    editedData={editedData}
+                    deletedData={deletedData}
+                    show={showList}
+                    moveToOriginData={this.moveToOriginData}
+                    onClose={() => this.toggleList()}
+                />
+                <Settings
+                    show={showSettings}
+                    importConfig={this.importConfig}
+                    exportConfig={this.exportConfig}
+                    importCacheData={this.importCacheData}
+                    exportCacheData={this.exportCacheData}
+                    onClose={this.toggleSettings}
+                />
             </div>
-        )
+        );
     }
 }

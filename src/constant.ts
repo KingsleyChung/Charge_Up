@@ -10,21 +10,51 @@ export const DataKeyMap: Record<string, string[]> = {
     businessNo: ['交易单号', '交易订单号'],
     shopNo: ['商户单号', '商家订单号'],
     receiverAccount: ['对方账号'],
-    note: ['备注']
-}
+    note: ['备注'],
+};
 
 export const DataFieldOption = {
     inOrOut: ['支出', '收入', '其他'],
     firstCategory: ['饮食', '购物', '交通'],
     secondCategory: {
-        '饮食': ['三餐', '饮料', '食品', '水果', '零食', '餐券'],
-        '购物': ['服装', '数码产品', '礼品', '家具', '游戏', '护肤品', '杂物', '鞋帽包', '配件', '日用品', '数码配件', '饰品', '化妆品', '运动用品', '其他物品', '家电', '居家用品'],
-        '交通': ['公共交通', '共享单车', '加油', '停车费', '打车', '机票', '快递', '高铁', '公交卡', '桥路费', '租车'],
+        饮食: ['三餐', '饮料', '食品', '水果', '零食', '餐券'],
+        购物: [
+            '服装',
+            '数码产品',
+            '礼品',
+            '家具',
+            '游戏',
+            '护肤品',
+            '杂物',
+            '鞋帽包',
+            '配件',
+            '日用品',
+            '数码配件',
+            '饰品',
+            '化妆品',
+            '运动用品',
+            '其他物品',
+            '家电',
+            '居家用品',
+        ],
+        交通: [
+            '公共交通',
+            '共享单车',
+            '加油',
+            '停车费',
+            '打车',
+            '机票',
+            '快递',
+            '高铁',
+            '公交卡',
+            '桥路费',
+            '租车',
+        ],
     },
     wallet: ['现金', '小金库', '信用卡'],
     member: ['本人', '父母', '兄弟姐妹', '祖父母'],
     project: ['日常'],
-}
+};
 
 export const exportFields = [
     { label: '交易类型', key: 'inOrOut' },
@@ -44,7 +74,7 @@ export const exportFields = [
     // { label: '', key: 'businessNo' },
     // { label: '', key: 'shopNo' },
     // { label: '', key: 'receiverAccount' },
-]
+];
 
 export enum FORM_ITEM_TYPE {
     INPUT,
@@ -59,4 +89,9 @@ export const enum MODE {
     IMPORT,
     EDIT,
     EXPORT,
-  }
+}
+
+export const enum EDITED_LIST_TYPE {
+    EDITED,
+    DELETED,
+}
