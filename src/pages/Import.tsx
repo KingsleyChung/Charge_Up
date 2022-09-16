@@ -1,6 +1,6 @@
 import { FunctionComponent, useRef } from 'react';
 import { AlipayCircleOutlined, WechatOutlined } from '@ant-design/icons';
-import { Row, Button, Upload, Card, message } from 'antd';
+import { Row, Button, Upload, Card, message, Modal } from 'antd';
 import utils from '../utils';
 
 interface UploadBtnProps {
@@ -36,7 +36,7 @@ const UploadButton: FunctionComponent<UploadBtnProps> = (
 };
 
 interface Props {
-    onSubmit: (data: any[]) => void;
+    onSubmit: (data: string) => void;
 }
 
 const Import: FunctionComponent<Props> = (props: Props): JSX.Element => {
@@ -50,6 +50,37 @@ const Import: FunctionComponent<Props> = (props: Props): JSX.Element => {
         } else if (type === 'wechat') {
             wxData.current = data;
         }
+    };
+
+    const importCacheData = (data: Record<string, any> | null) => {
+        console.log(data);
+        if (!data) {
+            return;
+        }
+        const dataString = JSON.stringify(data);
+        localStorage.setItem('cacheData', dataString);
+        props.onSubmit(dataString);
+    };
+
+    const uploadProps = {
+        name: 'file',
+        accept: '.json',
+        showUploadList: false,
+        beforeUpload: async (file: any) => {
+            try {
+                Modal.confirm({
+                    title: '确认导入',
+                    onOk: async () => {
+                        const data = await utils.getJsonFromFile(file);
+                        console.log('load json:', data);
+                        importCacheData(data as Record<string, any>);
+                    },
+                });
+                return false;
+            } catch (err) {
+                console.error(err);
+            }
+        },
     };
 
     return (
@@ -93,11 +124,26 @@ const Import: FunctionComponent<Props> = (props: Props): JSX.Element => {
                             aliData?.current
                         );
                         console.log('unifiedData:', unifiedData);
-                        props.onSubmit(unifiedData);
+                        props.onSubmit(
+                            JSON.stringify({ originData: unifiedData })
+                        );
                     }}>
                     导入
                 </Button>
             </Row>
+            <Upload {...uploadProps}>
+                <Button
+                    style={{
+                        position: 'fixed',
+                        bottom: '1rem',
+                        right: '1rem',
+                        width: '5rem',
+                        height: '5rem',
+                    }}
+                    shape="circle">
+                    导入缓存
+                </Button>
+            </Upload>
         </div>
     );
 };

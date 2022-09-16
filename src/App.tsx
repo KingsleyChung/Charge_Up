@@ -20,8 +20,8 @@ const App: FunctionComponent = () => {
         <>
             {mode === MODE.IMPORT && (
                 <Import
-                    onSubmit={(data) => {
-                        setOriginData(JSON.stringify({ originData: data }));
+                    onSubmit={(data: string) => {
+                        setOriginData(data);
                         setMode(MODE.EDIT);
                     }}
                 />
