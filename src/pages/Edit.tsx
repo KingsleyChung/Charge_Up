@@ -7,6 +7,7 @@ import NavBar from '../components/NavBar';
 import utils from '../utils';
 import moment, { Moment } from 'moment';
 import Settings from '../components/Settings';
+import { Card, Modal } from 'antd';
 
 interface Props {
     data: string;
@@ -108,13 +109,17 @@ export default class Edit extends React.Component<Props, State> {
         const { originData, currentIndex } = this.state;
         if (currentIndex + 1 < originData.length) {
             this.setState({ currentIndex: currentIndex + 1 });
+        } else {
+            this.setState({ currentIndex: 0 });
         }
     };
 
     goPrev = () => {
-        const { currentIndex } = this.state;
+        const { currentIndex, originData } = this.state;
         if (currentIndex - 1 >= 0) {
             this.setState({ currentIndex: currentIndex - 1 });
+        } else {
+            this.setState({ currentIndex: originData.length - 1 });
         }
     };
 
@@ -123,14 +128,22 @@ export default class Edit extends React.Component<Props, State> {
         const data = originData[currentIndex];
         deletedData.push(data);
         originData.splice(currentIndex, 1);
-        this.setState({ originData, deletedData });
+        this.setState({
+            originData,
+            deletedData,
+            currentIndex: currentIndex >= originData.length ? 0 : currentIndex,
+        });
     };
 
     saveData = (data: FlowItem) => {
         const { currentIndex, originData, editedData } = this.state;
         editedData.push(data);
         originData.splice(currentIndex, 1);
-        this.setState({ originData, editedData });
+        this.setState({
+            originData,
+            editedData,
+            currentIndex: currentIndex >= originData.length ? 0 : currentIndex,
+        });
     };
 
     moveToOriginData = (type: 'edited' | 'deleted', index: number) => {
@@ -145,7 +158,11 @@ export default class Edit extends React.Component<Props, State> {
         if (!sourceData?.[index]) {
             return;
         }
-        originData.splice(currentIndex, 0, sourceData?.[index]);
+        if (originData.length) {
+            originData.splice(currentIndex, 0, sourceData?.[index]);
+        } else {
+            originData.push(sourceData?.[index]);
+        }
         sourceData.splice(index, 1);
         if (type === 'edited') {
             this.setState({ originData, editedData: sourceData });
@@ -211,8 +228,14 @@ export default class Edit extends React.Component<Props, State> {
     };
 
     goBack = () => {
-        localStorage.removeItem('cacheData');
-        this.props.setMode(MODE.IMPORT);
+        Modal.confirm({
+            title: '确认返回',
+            content: '若返回导入页面，已编辑数据将被删除，是否确认返回？',
+            onOk: () => {
+                localStorage.removeItem('cacheData');
+                this.props.setMode(MODE.IMPORT);
+            },
+        });
     };
 
     render(): JSX.Element {
@@ -230,12 +253,25 @@ export default class Edit extends React.Component<Props, State> {
         }
         return (
             <div id="edit">
-                <DetailCard
-                    data={originData?.[currentIndex]}
-                    config={config}
-                    saveData={this.saveData}
-                    deleteData={this.deleteData}
-                />
+                {originData?.length ? (
+                    <DetailCard
+                        data={originData?.[currentIndex]}
+                        config={config}
+                        saveData={this.saveData}
+                        deleteData={this.deleteData}
+                    />
+                ) : (
+                    <Card
+                        style={{
+                            height: '72vh',
+                            margin: '1.6rem',
+                            display: 'flex',
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                        }}>
+                        无数据
+                    </Card>
+                )}
                 <NavBar
                     currentIndex={currentIndex}
                     totalCount={originData.length}

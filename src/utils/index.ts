@@ -49,7 +49,7 @@ const jsonToXlsx = (
         return res;
     });
     var XLSX = require('xlsx');
-    const wopts = { bookType: 'xlsx', bookSST: false, type: 'binary' };
+    const wopts = { bookType: 'xls', bookSST: false, type: 'binary' };
     const wb: any = { SheetNames: ['Sheet1'], Sheets: {}, Props: {} };
     wb.Sheets['Sheet1'] = XLSX.utils.json_to_sheet(data);
     saveAs(

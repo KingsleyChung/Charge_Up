@@ -38,7 +38,7 @@ const DetailCard: React.FC<Props> = (props: Props): JSX.Element => {
 
     useEffect(() => {
         const data = props.data;
-        if (typeof data.firstCategory === 'string') {
+        if (!data.category?.length && typeof data.firstCategory === 'string') {
             data.category = data.firstCategory.split('/');
         }
         // else {
@@ -56,6 +56,7 @@ const DetailCard: React.FC<Props> = (props: Props): JSX.Element => {
         if (!data.note) {
             data.note = '';
         }
+        console.log('currentData:', props.data);
         form.setFieldsValue(props.data);
     }, [props]);
 
@@ -130,7 +131,6 @@ const DetailCard: React.FC<Props> = (props: Props): JSX.Element => {
         if (values.category?.length) {
             values.firstCategory = values.category[0];
             values.secondCategory = values.category[1];
-            delete values.category;
         }
         props.saveData(values as FlowItem);
     };
