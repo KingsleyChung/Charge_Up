@@ -80,7 +80,7 @@ const EditedList: React.FC<Props> = (props: Props): JSX.Element => {
                 rightData = rightData.join('/');
             }
             const row = (
-                <Row gutter={12}>
+                <Row gutter={12} key={`editedItem_${i}`}>
                     <Col span={rightData ? 12 : 24}>
                         <Paragraph ellipsis={true} style={{ marginBottom: 0 }}>
                             {leftLabel}
