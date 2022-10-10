@@ -132,7 +132,8 @@ const DetailCard: React.FC<Props> = (props: Props): JSX.Element => {
             values.firstCategory = values.category[0];
             values.secondCategory = values.category[1];
         }
-        props.saveData(values as FlowItem);
+        const newData = Object.assign({}, props.data, values);
+        props.saveData(newData);
     };
 
     return (
@@ -221,6 +222,11 @@ const DetailCard: React.FC<Props> = (props: Props): JSX.Element => {
                     <Tooltip title={props.data.goods}>
                         <Paragraph ellipsis={true}>
                             商品：{props.data.goods}
+                        </Paragraph>
+                    </Tooltip>
+                    <Tooltip title={props.data.status}>
+                        <Paragraph ellipsis={true}>
+                            状态：{props.data.status}
                         </Paragraph>
                     </Tooltip>
                 </Typography>

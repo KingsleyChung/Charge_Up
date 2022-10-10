@@ -28,88 +28,95 @@ interface Props {
     onClose: () => void;
 }
 
+const deletedRenderField = [
+    { label: '金额: ', field: 'amount' },
+    {},
+    { label: '收款人: ', field: 'receiver' },
+    {},
+    { label: '商品: ', field: 'goods' },
+];
+
+const editedRenderField = [
+    { label: '金额: ', field: 'amount' },
+    { label: '收/支: ', field: 'inOrOut' },
+    { label: '分类: ', field: 'category' },
+    { label: '钱包: ', field: 'wallet' },
+    { label: '成员: ', field: 'member' },
+    { label: '项目: ', field: 'project' },
+    { label: '备注: ', field: 'note' },
+    {},
+    { label: '收款人: ', field: 'receiver' },
+    {},
+    { label: '商品: ', field: 'goods' },
+    {},
+];
+
 const EditedList: React.FC<Props> = (props: Props): JSX.Element => {
     const { editedData, deletedData, show, moveToOriginData, onClose } = props;
     const [showType, setShowType] = useState<'edited' | 'deleted'>('edited');
+
+    const renderFields = (
+        data: FlowItem,
+        type: EDITED_LIST_TYPE
+    ): JSX.Element[] => {
+        const renderFields =
+            type === EDITED_LIST_TYPE.EDITED
+                ? editedRenderField
+                : deletedRenderField;
+        const rows: JSX.Element[] = [];
+        for (let i = 0; i < renderFields.length; i += 2) {
+            const leftLabel = renderFields[i]?.label || '';
+            const rightLabel = renderFields[i + 1]?.label || '';
+            let leftData = renderFields[i]?.field
+                ? data[renderFields[i].field as keyof FlowItem]
+                : null;
+            let rightData = renderFields[i + 1]?.field
+                ? data[renderFields[i + 1].field as keyof FlowItem]
+                : null;
+            if (Array.isArray(leftData)) {
+                leftData = leftData.join('/');
+            }
+            if (Array.isArray(rightData)) {
+                rightData = rightData.join('/');
+            }
+            const row = (
+                <Row gutter={12}>
+                    <Col span={rightData ? 12 : 24}>
+                        <Paragraph ellipsis={true} style={{ marginBottom: 0 }}>
+                            {leftLabel}
+                            <Tooltip title={leftData as string}>
+                                {leftData as string}
+                            </Tooltip>
+                        </Paragraph>
+                    </Col>
+                    {rightData && (
+                        <Col span={12}>
+                            <Paragraph
+                                ellipsis={true}
+                                style={{ marginBottom: 0 }}>
+                                {rightLabel}
+                                <Tooltip title={rightData as string}>
+                                    {rightData as string}
+                                </Tooltip>
+                            </Paragraph>
+                        </Col>
+                    )}
+                </Row>
+            );
+            rows.push(row);
+        }
+        return rows;
+    };
 
     const renderList = (
         data: FlowItem[],
         type: EDITED_LIST_TYPE
     ): JSX.Element[] => {
-        const renderFieldMap = [
-            {},
-            {
-                [EDITED_LIST_TYPE.DELETED]: {
-                    label: '收款人：',
-                    field: 'receiver',
-                },
-                [EDITED_LIST_TYPE.EDITED]: {
-                    label: '分类：',
-                    field: 'secondCategory',
-                },
-            },
-            {
-                [EDITED_LIST_TYPE.DELETED]: {
-                    label: '商品：',
-                    field: 'goods',
-                },
-                [EDITED_LIST_TYPE.EDITED]: {
-                    label: '备注：',
-                    field: 'note',
-                },
-            },
-        ];
         const list = data.map((item, index) => {
             return (
                 <Card key={index}>
                     <Row justify="space-between" align="middle">
-                        <Col span={21}>
-                            <Row gutter={12}>
-                                <Col span={10}>金额：￥{item.amount}</Col>
-                                <Col span={14}>
-                                    <Paragraph
-                                        ellipsis={true}
-                                        style={{ marginBottom: 0 }}>
-                                        {renderFieldMap[1][type]?.label}
-                                        <Tooltip
-                                            title={
-                                                item?.[
-                                                    renderFieldMap[1][type]
-                                                        ?.field as keyof FlowItem
-                                                ] as string
-                                            }>
-                                            {
-                                                item?.[
-                                                    renderFieldMap[1][type]
-                                                        ?.field as keyof FlowItem
-                                                ] as string
-                                            }
-                                        </Tooltip>
-                                    </Paragraph>
-                                </Col>
-                            </Row>
-                            <Row>
-                                <Paragraph
-                                    ellipsis={true}
-                                    style={{ marginBottom: 0 }}>
-                                    {renderFieldMap[2][type]?.label}
-                                    <Tooltip
-                                        title={
-                                            item?.[
-                                                renderFieldMap[2][type]
-                                                    ?.field as keyof FlowItem
-                                            ] as string
-                                        }>
-                                        {
-                                            item?.[
-                                                renderFieldMap[2][type]
-                                                    ?.field as keyof FlowItem
-                                            ] as string
-                                        }
-                                    </Tooltip>
-                                </Paragraph>
-                            </Row>
-                        </Col>
+                        <Col span={21}>{renderFields(item, type)}</Col>
                         <Col
                             span={3}
                             style={{ display: 'flex', justifyContent: 'end' }}>
